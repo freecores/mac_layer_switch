@@ -51,31 +51,61 @@ module mem_units(reset,clk,Dw1_iba_i,mem_u_o1,headers_o1,start_length1,StartFrm1
                  
 endmodule
    
-module Complete_on_write(reset , clk , Dw_iba_i,ram_oe,ram_we,Completed_ram_do,same_DW_read,complete_Ack);
+module Complete_on_write(reset , clk , Dw_iba_i,ram_oe,ram_we,Completed_ram_do,same_DW_read,addr_valid);
 
      input reset, clk, ram_oe, ram_we;
      input [31:0] Dw_iba_i;
      output [31:0] Completed_ram_do;
-     output complete_Ack;
      input  [2:0] same_DW_read;
+     input  addr_valid;
      reg [31:0] Completed_ram_do  ;
      reg [31:0] delay_data_unit_1 , delay_data_unit_2;
-      initial  delay_data_unit_1 = 32'h0;
-      initial  delay_data_unit_2 = 32'h0;
-      
-     assign complete_Ack = 1;
-
-    // fsm replacement trial version
+      initial begin 
+        delay_data_unit_1 = 32'h0;
+        delay_data_unit_2 = 32'h0;
+        xor_data = 0;
+        cnt_fsm = 0;
+        clk_cnt = 0;
+     end
        reg xor_data;
+     //this blk to solve the read mem with unvalid ram_addr 
        always @ (posedge clk)
        begin
-
-            delay_data_unit_1<=Dw_iba_i;
-            delay_data_unit_2<=delay_data_unit_1;
-            xor_data <= |(delay_data_unit_1^Dw_iba_i); 
-           
-           end
-       
+        if (addr_valid == 1)
+            begin
+                delay_data_unit_1 <= Dw_iba_i;
+                delay_data_unit_2<=delay_data_unit_1;
+                xor_data <= |(delay_data_unit_1^Dw_iba_i);
+            end
+         else
+            begin
+                delay_data_unit_1 = 0;
+                delay_data_unit_2 = 0;
+            end 
+       end
+     //  
+            reg [7:0]clk_cnt;
+            reg [1:0]cnt_fsm; 
+            always @(posedge clk)
+             begin
+               case (cnt_fsm)
+                    2'h0: begin
+                             if (xor_data ==1)
+                                begin
+                                    cnt_fsm = 1;
+                                    clk_cnt = 0;
+                                end                        
+                          end
+                    2'h1: begin
+                            clk_cnt = clk_cnt+1;
+                            if (xor_data == 1)
+                              begin
+                                 clk_cnt = 0;
+                              end
+                           end      
+                endcase
+             end
+            
             reg [3:0] fsm_cycle;
        initial fsm_cycle =0 ;
        always @ (posedge clk)
@@ -117,7 +147,7 @@ endmodule
         input adr_valid;         // from dpq - request to release that addr
         output transmit_done;    // tell DPQ transmission completed for last request
         output [31:0] ram_do,header_to_dcp;
-       wire  ram_ce , complete_Ack;
+       wire  ram_ce ;
        reg   ram_oe , tst_reg;
        reg  ram_we, ram_we_pre,ram_oe_pre , headers_2_dcp_en , dmac_en;
        reg [7:0]   ram_addr ,w_ram_addr ;
@@ -127,7 +157,7 @@ endmodule
        reg [2:0] same_DW_read_cnt , same_DW_free_cnt ;
        reg [3:0] fsm_state, counter_modulu8_fsm;
        reg transmit_done, increment_same_DW;
-       reg read_arguments_valid, read_valid , div_2_clk,div_4_clk;
+       reg read_arguments_valid,read_argumets_valid_delay_unit1,read_argumets_valid_delay_unit2, read_valid , div_2_clk,div_4_clk;
        reg ipg_out_mem;   // this bit indicate when we can start read again from mem.
        assign ram_ce = 1;
        //  assign  ram_do = Dw1_iba_i;
@@ -158,9 +188,9 @@ endmodule
          prev_input <= Dw_iba_i;
 
          ram_we <= |(prev_input^Dw_iba_i); //ram_we pulse every word change
-         ram_oe <= (~|(prev_input^Dw_iba_i));
-         
-               
+         ram_oe <= (~|(prev_input^Dw_iba_i)) & read_argumets_valid_delay_unit2;
+         read_argumets_valid_delay_unit1 <= read_arguments_valid;
+         read_argumets_valid_delay_unit2 <=read_argumets_valid_delay_unit1;      
          end
 
        always @(posedge StartFrm)
@@ -178,7 +208,7 @@ endmodule
            dmac_en=1;
         end
      //complete mem output upon write to mem interupts  
-     Complete_on_write complete_on_write1(.reset(reset),.clk(clk),.Dw_iba_i(ram_do1),.ram_oe(ram_oe),.ram_we(ram_we),.Completed_ram_do(ram_do),.complete_Ack(complete_Ack),.same_DW_read(same_DW_read_cnt));
+     Complete_on_write complete_on_write1(.reset(reset),.clk(clk),.Dw_iba_i(ram_do1),.ram_oe(ram_oe),.ram_we(ram_we),.Completed_ram_do(ram_do),.same_DW_read(same_DW_read_cnt),.addr_valid(read_argumets_valid_delay_unit2));
      //   | 32bit dmac | 16 bit dmac | 8 bit length| 8 bit start addr|
        //Go into write interval 
        always @ (posedge ram_we)    //write interval
@@ -366,7 +396,7 @@ endmodule
               .clk     (~clk),
               .rst     (reset),             
               .ce      (ram_ce),                                                                                         // Chip enable input, active high   
-              .we      ({ram_we & complete_Ack,ram_we & complete_Ack,ram_we & complete_Ack,ram_we & complete_Ack}),      // Write enable input, active high  
+              .we      ({ram_we ,ram_we ,ram_we,ram_we }),      // Write enable input, active high  
               .oe      (ram_oe),                                                                                         // Output enable input, active high 
               .addr    (ram_addr),                                                                                       // address bus inputs               
               .di      (Dw_iba_i),                                                                                      // input data bus                   
