@@ -376,13 +376,15 @@ module Dword_to_byte(reset,clk ,byte ,Dword , TxStartFrm , TxEndFrm ,TxStartFrm_
     output TxStartFrm_0 , TxEndFrm_1;
    // output TxStartFrm_ , TxEndFrm_;
      reg  clk_div2 ,clk_div4 ;
-     reg [2:0] mod4;
+     reg [1:0] mod4;
      reg [1:0] mod4_;
      reg [7:0] byte;
      reg TxStartFrm_ , TxEndFrm_ ,TxStartFrm_1,TxStartFrm_2, start_en , start_en_ ,end_en , start_signal_detect;
      reg [9:0] counter;
+     reg [1:0] FSMState;
      wire   TxStartFrm_0 , TxEndFrm_1;
      initial begin
+        FSMState = 0;
          mod4=0;
          mod4_=0;
          counter =0;
@@ -402,12 +404,12 @@ module Dword_to_byte(reset,clk ,byte ,Dword , TxStartFrm , TxEndFrm ,TxStartFrm_
       always @(posedge TxEndFrm )
         begin
             end_en<=1;
-            mod4 <=0 ;
+       //     mod4 <=0 ;
          end
       always @(posedge TxStartFrm )
         begin
            mod4_ <= 0;
-           mod4 <= 0;
+         //  mod4 <= 0;
            counter=0;
           // start_en<=1;      //push simultaneously
            //clk_div2=1;
@@ -427,7 +429,7 @@ module Dword_to_byte(reset,clk ,byte ,Dword , TxStartFrm , TxEndFrm ,TxStartFrm_
       begin
            TxEndFrm_<=(mod4==4)?(~clk_div2)&end_en:TxEndFrm;
            end_en<= (mod4==5)?0:end_en;
-           mod4<=mod4+1;
+           
           mod4_<=mod4_+1;
           start_signal_detect = |Dword;
           TxStartFrm_=start_signal_detect & clk_div2;
@@ -439,16 +441,55 @@ module Dword_to_byte(reset,clk ,byte ,Dword , TxStartFrm , TxEndFrm ,TxStartFrm_
                       begin
                        TxStartFrm_ =0;
                       end
-          case(mod4_)
+          
+                    
+                            
+       end
+        always @(negedge clk_div2)
+        begin
+        case(mod4)
 
             2'h0:  byte<= Dword[31:24] ;
             2'h1:  byte<= Dword[23:16] ;
             2'h2:  byte<= Dword[15:8] ;
             2'h3:  byte<= Dword[7:0] ;
           endcase
-                    
-       end
-             
+        end
+        always @ (posedge clk_div2)
+        begin
+            case (FSMState)
+            2'b00: begin    // this is non recieving frame state
+                    if (start_signal_detect == 0)
+                        begin
+                        //FSMState <= 2'b00;
+                        mod4 <= 0;
+                        end
+                    else if (start_signal_detect == 1)
+                        begin
+                        FSMState <= 2'b11;
+                        mod4 <= mod4+1;
+                        end
+                    end
+        //    2'b01:  begin
+         //           if (start_signal_detect == 1)
+          //              begin
+           //             FSMState <= 2'b11;
+           //             mod4 <= 0;
+           //             end
+            //        end 
+            2'b11: begin 
+                    if (start_signal_detect == 1)
+                        begin
+                        //FSMState <= 2'b11;
+                        mod4 <= mod4 +1;
+                        end
+                        else if (start_signal_detect==0)
+                        begin
+                        FSMState<= 2'b00;
+                        end
+                    end
+            endcase
+        end     
     endmodule
 
     

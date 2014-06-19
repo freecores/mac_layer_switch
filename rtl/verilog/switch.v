@@ -137,7 +137,7 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
    input  [3:0] pi1,pi2,pi3,pi4,pi5,pi6;
    output [3:0] po1, po2,po3, po4,po5, po6;
    output [31:0]  Dw1o,Dw2o,Dw3o,Dw4o,Dw5o,Dw6o;//  to IBA
-   input  [31:0] Dw1i,Dw2i,Dw3i,Dw4i,Dw5i,Dw6i;//  from IBA
+   input  [31:0] Dw1i,Dw2i,Dw3i,Dw4i,Dw5i,Dw6i;//  from Xbar
    output  plu2iba_start_pack_1 , plu2iba_start_pack_2,plu2iba_start_pack_3,plu2iba_start_pack_4,plu2iba_start_pack_5,plu2iba_start_pack_6;
    input   iba2plu_start_pack_1 , iba2plu_start_pack_2,iba2plu_start_pack_3,iba2plu_start_pack_4,iba2plu_start_pack_5,iba2plu_start_pack_6;
     output    plu2iba_end_pack_1 , plu2iba_end_pack_2,plu2iba_end_pack_3,plu2iba_end_pack_4,plu2iba_end_pack_5,plu2iba_end_pack_6; 
@@ -234,22 +234,22 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
                 transmit_done5,
                 transmit_done6;
        
-       assign  Dw1_iba_o=Dw1_iba_i; //initial LB configuration 
-       assign  Dw2_iba_o=Dw2_iba_i; //initial LB configuration
-       assign  Dw3_iba_o=Dw3_iba_i; //initial LB configuration
-       assign  Dw4_iba_o=Dw4_iba_i; //initial LB configuration
-       assign  Dw5_iba_o=Dw5_iba_i; //initial LB configuration
-       assign  Dw6_iba_o=Dw6_iba_i; //initial LB configuration
+       assign  Dw1_iba_o=mem_u_o1;  
+       assign  Dw2_iba_o=mem_u_o2;   //Dw2_iba_i for LB 
+       assign  Dw3_iba_o=mem_u_o3; 
+       assign  Dw4_iba_o=mem_u_o4; 
+       assign  Dw5_iba_o=mem_u_o5; 
+       assign  Dw6_iba_o=mem_u_o6; 
 
-       assign iba2plu_start_pack_1 = plu2iba_start_pack_1;
-       assign iba2plu_start_pack_2 = plu2iba_start_pack_2;
+       assign iba2plu_start_pack_1 = 0;
+       assign iba2plu_start_pack_2 = 0;
        assign iba2plu_start_pack_3 = plu2iba_start_pack_3;
        assign iba2plu_start_pack_4 = plu2iba_start_pack_4;
        assign iba2plu_start_pack_5 = plu2iba_start_pack_5;
        assign iba2plu_start_pack_6 = plu2iba_start_pack_6;
 
-       assign iba2plu_end_pack_1 = plu2iba_end_pack_1; 
-       assign iba2plu_end_pack_2 = plu2iba_end_pack_2; 
+       assign iba2plu_end_pack_1 = 0; 
+       assign iba2plu_end_pack_2 = 0; 
        assign iba2plu_end_pack_3 = plu2iba_end_pack_3;
        assign iba2plu_end_pack_4 = plu2iba_end_pack_4;
        assign iba2plu_end_pack_5 = plu2iba_end_pack_5;
@@ -330,6 +330,11 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
   
        //fifo Qps need to validate addr_valid in the end
     Qp qp1(.reset(reset),.clk(clk),.transmit_done(transmit_done1),.Din(start_addr1),.start_adr(start_length1),.T_q(T_q1),.adr_valid(adr_valid1));    
+    Qp qp2(.reset(reset),.clk(clk),.transmit_done(transmit_done2),.Din(start_addr2),.start_adr(start_length2),.T_q(T_q2),.adr_valid(adr_valid2));
+    Qp qp3(.reset(reset),.clk(clk),.transmit_done(transmit_done3),.Din(start_addr3),.start_adr(start_length3),.T_q(T_q3),.adr_valid(adr_valid3));
+    Qp qp4(.reset(reset),.clk(clk),.transmit_done(transmit_done4),.Din(start_addr4),.start_adr(start_length4),.T_q(T_q4),.adr_valid(adr_valid4));
+    Qp qp5(.reset(reset),.clk(clk),.transmit_done(transmit_done5),.Din(start_addr5),.start_adr(start_length5),.T_q(T_q5),.adr_valid(adr_valid5));
+    Qp qp6(.reset(reset),.clk(clk),.transmit_done(transmit_done6),.Din(start_addr6),.start_adr(start_length6),.T_q(T_q6),.adr_valid(adr_valid6));
        
    endmodule
 

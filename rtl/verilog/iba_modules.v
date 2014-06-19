@@ -188,7 +188,7 @@ endmodule
          prev_input <= Dw_iba_i;
 
          ram_we <= |(prev_input^Dw_iba_i); //ram_we pulse every word change
-         ram_oe <= (~|(prev_input^Dw_iba_i)) & read_argumets_valid_delay_unit2;
+         ram_oe <= (~|(prev_input^Dw_iba_i)) & read_argumets_valid_delay_unit1;
          read_argumets_valid_delay_unit1 <= read_arguments_valid;
          read_argumets_valid_delay_unit2 <=read_argumets_valid_delay_unit1;      
          end
