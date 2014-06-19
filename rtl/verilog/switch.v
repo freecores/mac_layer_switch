@@ -21,7 +21,7 @@
 `include "dcp_modules.v"
 `include "dpq_modules.v"
 `include "plu_moduls.v"
-`include "Xbar_modules.v"
+//`include "Xbar_modules.v"
 
 
 
@@ -367,7 +367,7 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
      
           //create module that create start/end packet signals detect by delay and xor 
           // delimiter_add                                                             
-    Alignment_marker align1(.reset(reset),.clk(clk),.Data_o(Data_o1),.iba2xbar_start_pack(iba2xbar_start_pack),.iba2xbar_end_pack(iba2xbar_end_pack),.xbar2plu_start_pack(xbar2plu_start_pack),.xbar2plu_end_pack(xbar2plu_end_pack));
+ //   Alignment_marker align1(.reset(reset),.clk(clk),.Data_o(Data_o1),.iba2xbar_start_pack(iba2xbar_start_pack),.iba2xbar_end_pack(iba2xbar_end_pack),.xbar2plu_start_pack(xbar2plu_start_pack),.xbar2plu_end_pack(xbar2plu_end_pack));
          
          always @ (posedge clk)
         begin
