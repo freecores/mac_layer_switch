@@ -202,6 +202,10 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
         
        Dword_to_byte Dword_to_byte1(.reset(reset),.clk(clk), .byte(word_back1) ,.Dword(Dw1i) ,.TxStartFrm(iba2plu_start_pack_1),.TxEndFrm(iba2plu_end_pack_1),.TxStartFrm_0(TxStartFrm1),.TxEndFrm_1(TxEndFrm1));
        Dword_to_byte Dword_to_byte2(.reset(reset),.clk(clk), .byte(word_back2) ,.Dword(Dw2i) ,.TxStartFrm(iba2plu_start_pack_2),.TxEndFrm(iba2plu_end_pack_2),.TxStartFrm_0(TxStartFrm2),.TxEndFrm_1(TxEndFrm2));                                                        
+       Dword_to_byte Dword_to_byte3(.reset(reset),.clk(clk), .byte(word_back3) ,.Dword(Dw3i) ,.TxStartFrm(iba2plu_start_pack_3),.TxEndFrm(iba2plu_end_pack_3),.TxStartFrm_0(TxStartFrm3),.TxEndFrm_1(TxEndFrm3));
+       Dword_to_byte Dword_to_byte4(.reset(reset),.clk(clk), .byte(word_back4) ,.Dword(Dw4i) ,.TxStartFrm(iba2plu_start_pack_4),.TxEndFrm(iba2plu_end_pack_4),.TxStartFrm_0(TxStartFrm4),.TxEndFrm_1(TxEndFrm4));
+       Dword_to_byte Dword_to_byte5(.reset(reset),.clk(clk), .byte(word_back5) ,.Dword(Dw5i) ,.TxStartFrm(iba2plu_start_pack_5),.TxEndFrm(iba2plu_end_pack_5),.TxStartFrm_0(TxStartFrm5),.TxEndFrm_1(TxEndFrm5));
+       Dword_to_byte Dword_to_byte6(.reset(reset),.clk(clk), .byte(word_back6) ,.Dword(Dw6i) ,.TxStartFrm(iba2plu_start_pack_6),.TxEndFrm(iba2plu_end_pack_6),.TxStartFrm_0(TxStartFrm6),.TxEndFrm_1(TxEndFrm6));
                                                              
   endmodule
 
@@ -235,7 +239,7 @@ module plu (reset,clk , pi1,pi2,pi3,pi4,pi5,pi6, po1, po2,po3, po4,po5, po6, Dw1
                 transmit_done6;
        
        assign  Dw1_iba_o=mem_u_o1;  
-       assign  Dw2_iba_o=mem_u_o2;   //Dw2_iba_i for LB 
+       assign  Dw2_iba_o=mem_u_o2;    
        assign  Dw3_iba_o=mem_u_o3; 
        assign  Dw4_iba_o=mem_u_o4; 
        assign  Dw5_iba_o=mem_u_o5; 
